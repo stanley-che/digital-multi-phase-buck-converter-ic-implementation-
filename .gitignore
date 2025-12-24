@@ -1,0 +1,9 @@
+*.vcd
+*.vpd
+*.fst
+*.wlf
+*.log
+*.tmp
+*.bak
+*.swp
+.DS_Store
