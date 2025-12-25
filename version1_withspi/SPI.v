@@ -73,8 +73,59 @@ SPI_Controller #(
 );
 
 // Peripheral 0: spi_reg
+  logic       convst_bar;
+    logic [9:0] mon_duty_high;
+    logic [9:0] mon_duty_low;
+    logic duty_high0;
+    logic duty_low0;
+    logic duty_high1;
+    logic duty_low1;
+    logic duty_high2;
+    logic duty_low2;
+    logic duty_high3;
+    logic duty_low3;
+    logic [7:0] data_in;
 
-spi_reg #(
+ top #(
+    .PAUSE(PAUSE),
+    .LENGTH_SEND_C(LENGTH_SEND_C),
+    .LENGTH_SEND_P(LENGTH_SEND_P),
+    .LENGTH_RECIEVED_C(LENGTH_RECIEVED_C),
+    .LENGTH_RECIEVED_P(LENGTH_RECIEVED_P),
+    .LENGTH_COUNT_C(LENGTH_COUNT_C),
+    .LENGTH_COUNT_P(LENGTH_COUNT_P),
+    .PERIPHERY_COUNT(PERIPHERY_COUNT),
+    .PERIPHERY_SELECT(PERIPHERY_SELECT)
+) u_spi_reg(
+    .clk(clk),
+    .rst(rst),
+    .data_in(data_in),
+    .data_send_p(data_send_p), 
+    // SPI pins
+    .SCK(SCK),
+    .CS(CS_out[0]),
+    .COPI(COPI),
+    .CIPO(cipo0),
+    .COPI_register(COPI_register_0),
+    .duty_high0(duty_high0),
+    .duty_low0(duty_low0),
+    .duty_high1(duty_high1),
+    .duty_low1(duty_low1),
+    .duty_high2(duty_high2),
+    .duty_low2(duty_low2),
+    .duty_high3(duty_high3),
+    .duty_low3(duty_low3),
+    .convst_bar(convst_bar),
+    .mon_duty_high(mon_duty_high),
+    .mon_duty_low(mon_duty_low),
+    .mode_manual(mode_manual),
+    .en_pwm(en_pwm),
+    .freq_switch(freq_switch),
+    .duty_high_manual(duty_high),
+    .duty_low_manual(duty_low)
+);
+// Peripheral 0: spi_reg
+/*spi_reg #(
     .PAUSE(PAUSE),
     .LENGTH_SEND_C(LENGTH_SEND_C),
     .LENGTH_SEND_P(LENGTH_SEND_P),
@@ -98,7 +149,7 @@ spi_reg #(
     .freq_switch(freq_switch),
     .COPI_register(COPI_register_0),
     .regfile (regfile)
-);
+);*/
 
 SPI_Periphery #(
     .LENGTH_SEND(LENGTH_SEND_P),

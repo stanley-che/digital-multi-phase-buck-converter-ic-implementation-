@@ -2,7 +2,7 @@
 iverilog -g2012 -s SPI_TB -o sim \
   spi_slave.v spi_master.v spi_reg.v clkdivider.v dither_deadtime_count.v \
   shift_register_phase_shifter.v convert.v encoder.v top.v dither.v \
-  test/tb_reg.v test/test_reg.v
+  test/tb_reg.v SPI.v
 vvp sim
 */
 `timescale 1ns/100ps
@@ -63,28 +63,28 @@ endtask
 
 task automatic snapshot_rf;
 begin
-  rf0 = SPI.u_spi_reg.regfile[0];
-  rf1 = SPI.u_spi_reg.regfile[1];
-  rf2 = SPI.u_spi_reg.regfile[2];
-  rf3 = SPI.u_spi_reg.regfile[3];
-  rf4 = SPI.u_spi_reg.regfile[4];
-  rf5 = SPI.u_spi_reg.regfile[5];
+  rf0 = SPI.u_spi_reg.u_spi_reg1.regfile0;
+  rf1 = SPI.u_spi_reg.u_spi_reg1.regfile1;
+  rf2 = SPI.u_spi_reg.u_spi_reg1.regfile2;
+  rf3 = SPI.u_spi_reg.u_spi_reg1.regfile3;
+  rf4 = SPI.u_spi_reg.u_spi_reg1.regfile4;
+  rf5 = SPI.u_spi_reg.u_spi_reg1.regfile5;
 end
 endtask
 
 task automatic assert_rf_unchanged(input string tag);
 begin
-  if (SPI.u_spi_reg.regfile[0] !== rf0 ||
-      SPI.u_spi_reg.regfile[1] !== rf1 ||
-      SPI.u_spi_reg.regfile[2] !== rf2 ||
-      SPI.u_spi_reg.regfile[3] !== rf3 ||
-      SPI.u_spi_reg.regfile[4] !== rf4 ||
-      SPI.u_spi_reg.regfile[5] !== rf5) begin
+  if (SPI.u_spi_reg.u_spi_reg1.regfile0 !== rf0 ||
+      SPI.u_spi_reg.u_spi_reg1.regfile1 !== rf1 ||
+      SPI.u_spi_reg.u_spi_reg1.regfile2 !== rf2 ||
+      SPI.u_spi_reg.u_spi_reg1.regfile3 !== rf3 ||
+      SPI.u_spi_reg.u_spi_reg1.regfile4 !== rf4 ||
+      SPI.u_spi_reg.u_spi_reg1.regfile5 !== rf5) begin
     $display("[T5][FAIL] regfile changed unexpectedly (%s)", tag);
     $display("  old: r0=%h r1=%h r2=%h r3=%h r4=%h r5=%h", rf0,rf1,rf2,rf3,rf4,rf5);
     $display("  new: r0=%h r1=%h r2=%h r3=%h r4=%h r5=%h",
-              SPI.u_spi_reg.regfile[0], SPI.u_spi_reg.regfile[1], SPI.u_spi_reg.regfile[2],
-              SPI.u_spi_reg.regfile[3], SPI.u_spi_reg.regfile[4], SPI.u_spi_reg.regfile[5]);
+              SPI.u_spi_reg.u_spi_reg1.regfile0, SPI.u_spi_reg.u_spi_reg1.regfile1, SPI.u_spi_reg.u_spi_reg1.regfile2,
+              SPI.u_spi_reg.u_spi_reg1.regfile3, SPI.u_spi_reg.u_spi_reg1.regfile4, SPI.u_spi_reg.u_spi_reg1.regfile5);
     //$finish;
   end else begin
     $display("[T5][OK] regfile unchanged (%s)", tag);
@@ -250,7 +250,7 @@ if (SPI.u_spi_reg.u_spi_reg1.duty_high !== 10'b1000000011) begin
   $display("[T4][FAIL] addr duty_high=%h", SPI.u_spi_reg.u_spi_reg1.addr);
   $display("[T4][FAIL] WDATA duty_high=%h", SPI.u_spi_reg.u_spi_reg1.wdata);
   $display("[T4][FAIL] REG1 duty_high=%h", SPI.u_spi_reg.u_spi_reg1.duty_high);
-  $display("[T4][FAIL] REG1 duty_high=%h", SPI.u_spi_reg.u_spi_reg1.regfile[1][14:5]);
+  $display("[T4][FAIL] REG1 duty_high=%h", SPI.u_spi_reg.u_spi_reg1.regfile1[14:5]);
   $finish;
 end
 $display("[T4][OK] REG1 duty_high=0x155");
@@ -330,8 +330,8 @@ repeat (LENGTH_SEND_C + PAUSE + LENGTH_SEND_P + 4) begin
   start_comm <= 1'b0;
 end
 #1;
-if (SPI.u_spi_reg.duty_high !== 10'h1FF) begin
-  $display("[T5][FAIL] REG1 max write expected 1FF got %h", SPI.u_spi_reg.duty_high);
+if (SPI.u_spi_reg.u_spi_reg1.duty_high !== 10'h1FF) begin
+  $display("[T5][FAIL] REG1 max write expected 1FF got %h", SPI.u_spi_reg.u_spi_reg1.duty_high);
   $finish;
 end
 $display("[T5][OK] REG1 max=1FF");
@@ -376,8 +376,8 @@ repeat (LENGTH_SEND_C + PAUSE + LENGTH_SEND_P + 4) begin
   start_comm <= 1'b0;
 end
 #1;
-if (SPI.u_spi_reg.regfile[5] !== 10'h3FF) begin
-  $display("[T5][FAIL] REG5 max write expected 3FF got %h", SPI.u_spi_reg.regfile[5]);
+if (SPI.u_spi_reg.u_spi_reg1.regfile5 !== 10'h3FF) begin
+  $display("[T5][FAIL] REG5 max write expected 3FF got %h", SPI.u_spi_reg.u_spi_reg1.regfile5);
   $finish;
 end
 $display("[T5][OK] REG5 max=3FF");
@@ -480,12 +480,12 @@ $display("[T5][OK] back-to-back REG3 last-wins");
 // ------------------------------------------------------
 rst <= 1'b0;  // assert reset (active-low style)
 repeat (5) @(posedge clk);
-if (SPI.u_spi_reg.regfile[0] !== 10'h000 ||
-    SPI.u_spi_reg.regfile[1] !== 10'h000 ||
-    SPI.u_spi_reg.regfile[2] !== 10'h000 ||
-    SPI.u_spi_reg.regfile[3] !== 10'h000 ||
-    SPI.u_spi_reg.regfile[4] !== 10'h000 ||
-    SPI.u_spi_reg.regfile[5] !== 10'h000) begin
+if (SPI.u_spi_reg.u_spi_reg1.regfile0 !== 10'h000 ||
+    SPI.u_spi_reg.u_spi_reg1.regfile1 !== 10'h000 ||
+    SPI.u_spi_reg.u_spi_reg1.regfile2 !== 10'h000 ||
+    SPI.u_spi_reg.u_spi_reg1.regfile3 !== 10'h000 ||
+    SPI.u_spi_reg.u_spi_reg1.regfile4 !== 10'h000 ||
+    SPI.u_spi_reg.u_spi_reg1.regfile5 !== 10'h000) begin
   $display("[T5][FAIL] reset did not clear regfile");
   //$finish;
 end
@@ -501,8 +501,8 @@ repeat (LENGTH_SEND_C + PAUSE + LENGTH_SEND_P + 4) begin
   start_comm <= 1'b0;
 end
 #1;
-if (SPI.u_spi_reg.regfile[1] !== 10'h000) begin
-  $display("[T5][FAIL] write during reset should not stick, got %h", SPI.u_spi_reg.regfile[1]);
+if (SPI.u_spi_reg.u_spi_reg1.regfile1 !== 10'h000) begin
+  $display("[T5][FAIL] write during reset should not stick, got %h", SPI.u_spi_reg.u_spi_reg1.regfile1);
   //$finish;
 end
 $display("[T5][OK] write during reset ignored");
@@ -519,8 +519,8 @@ repeat (LENGTH_SEND_C + PAUSE + LENGTH_SEND_P + 4) begin
   start_comm <= 1'b0;
 end
 #1;
-if (SPI.u_spi_reg.regfile[1] !== 10'h155) begin
-  $display("[T5][FAIL] after reset release write failed, got %h", SPI.u_spi_reg.regfile[1]);
+if (SPI.u_spi_reg.u_spi_reg1.regfile1 !== 10'h155) begin
+  $display("[T5][FAIL] after reset release write failed, got %h", SPI.u_spi_reg.u_spi_reg1.regfile1);
   //$finish;
 end
 $display("[T5][OK] after reset release write works");

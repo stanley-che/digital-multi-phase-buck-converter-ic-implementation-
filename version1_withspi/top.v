@@ -35,11 +35,12 @@ module top #(
     output logic [9:0]  freq_switch,
     output logic [9:0]  duty_high_manual,
     output logic [9:0]  duty_low_manual,
-    output logic [9:0] regfile [0:5]    // 6 registers, each 10-bit wide
+    //output logic [9:0] regfile [0:5]    // 6 registers, each 10-bit wide
 
 );
 
-
+    assign mon_duty_high=duty_high_manual;
+    assign mon_duty_low =duty_low_manual;
     //spi reg module connection
     logic [6:0]d_n_input;
     logic [9:0]d_n;
@@ -119,8 +120,7 @@ spi_reg #(
     .duty_high(duty_high_manual),
     .duty_low(duty_low_manual),
     .freq_switch(freq_switch),
-    .COPI_register(COPI_register),
-    .regfile (regfile)
+    .COPI_register(COPI_register)
 );
 
 

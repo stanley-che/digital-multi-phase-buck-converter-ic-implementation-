@@ -31,11 +31,14 @@ module spi_reg #(
     output logic [9:0]                duty_high,
     output logic [9:0]                duty_low,
     output logic [9:0]                freq_switch,
-    output logic [LENGTH_RECIEVED_P-1:0] COPI_register,
-    output logic [9:0] regfile [0:5]    // 6 registers, each 10-bit wide
+    output logic [LENGTH_RECIEVED_P-1:0] COPI_register
 );
-
-
+    logic [9:0] regfile0;
+    logic [9:0] regfile1;
+    logic [9:0] regfile2;
+    logic [9:0] regfile3;
+    logic [9:0] regfile4;
+    logic [9:0] regfile5;
 
     // ============================================================
     // 1) peripheral instance (目前只接 P0；你之後可擴成 4 顆+CS decode)
@@ -86,20 +89,20 @@ always_ff @(posedge SCK) begin
 end
 always_ff @(posedge SCK) begin
   if (!rst) begin
-    regfile[0] <= '0;
-    regfile[1] <= '0;
-    regfile[2] <= '0;
-    regfile[3] <= '0;
-    regfile[4] <= '0;
-    regfile[5] <= '0;
+    regfile0 <= '0;
+    regfile1 <= '0;
+    regfile2 <= '0;
+    regfile3 <= '0;
+    regfile4 <= '0;
+    regfile5 <= '0;
   end else if (we) begin
     case (addr_lat)
-      4'h0: regfile[0] <= wdata_lat;
-      4'h1: regfile[1] <= wdata_lat;
-      4'h2: regfile[2] <= wdata_lat;
-      4'h3: regfile[3] <= wdata_lat;
-      4'h4: regfile[4] <= wdata_lat;
-      4'h5: regfile[5] <= wdata_lat;
+      4'h0: regfile0 <= wdata_lat;
+      4'h1: regfile1 <= wdata_lat;
+      4'h2: regfile2 <= wdata_lat;
+      4'h3: regfile3 <= wdata_lat;
+      4'h4: regfile4 <= wdata_lat;
+      4'h5: regfile5 <= wdata_lat;
       default: ; // 現在 default 永遠不會觸發
     endcase
   end
@@ -110,11 +113,11 @@ end
     // ============================================================
     // 3) outputs mapping
     // ============================================================
-    assign mode_manual = regfile[0][0];
-    assign en_pwm      = regfile[0][1];
-    assign duty_high   = regfile[1][9:0];
-    assign duty_low    = regfile[2][9:0];
-    assign freq_switch = regfile[3][9:0];
+    assign mode_manual = regfile0[0];
+    assign en_pwm      = regfile0[1];
+    assign duty_high   = regfile1[9:0];
+    assign duty_low    = regfile2[9:0];
+    assign freq_switch = regfile3[9:0];
     
 
 endmodule

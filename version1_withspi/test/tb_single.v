@@ -1,15 +1,17 @@
 `timescale 1ns/1ns
-//iverilog -g2012 -o sim.out \
-//tb_single.v \
-//top.v \
-//encoder.v \
-//clkdivider.v \
-//dither.v \
-//dither_deadtime_count.v \
-//convert.v \
-//shift_register_phase_shifter.v
+/*
+iverilog -g2012 -o sim.out \
+test/tb_single.v \
+top.v \
+encoder.v \
+clkdivider.v \
+dither.v \
+dither_deadtime_count.v \
+convert.v \
+shift_register_phase_shifter.v
 
-module tb_top;
+*/
+module tb_top();
 
   // -----------------------------
   // DUT I/O
@@ -26,14 +28,59 @@ module tb_top;
   logic        duty_high3;
   logic        duty_low3;
   logic        convst_bar;
-
+  
+  logic                      mode_manual;
+  logic                      en_pwm;
+  logic [9:0]                duty_high;
+  logic [9:0]                duty_low;
+  logic [9:0]                freq_switch;
+  
+  //Internal signals
+  logic COPI;                                   //Controller-Out Peripheral-In
+  logic SCK;                                    //Shared serial clock
+  logic CS;                                     //Chip select (not used)
+  parameter PAUSE=10;                  //Number of clock cycles between transmit and receive
+  parameter LENGTH_SEND_C=16;          //Length of sent data (Controller->Peripheral unit)
+  parameter LENGTH_SEND_P=16;         //Length of sent data (Peripheral unit-->Controller)
+  parameter LENGTH_RECIEVED_C=16;     //Length of recieved data (Peripheral unit-->Controller)
+  parameter LENGTH_RECIEVED_P=16;      //Length of recieved data (Controller-->Peripheral unit)
+  parameter LENGTH_COUNT_C=6;         //LENGTH_SEND_C+LENGTH_SEND_P+PAUSE+2=28 -->5 bit counter (default settings)
+  parameter LENGTH_COUNT_P=6;         //LENGTH_SEND_C+LENGTH_SEND_P+2=18 -->5 bit counter (default settings)
+  parameter PERIPHERY_COUNT=4;        //Number of peripherals
+  parameter PERIPHERY_SELECT=2;       //Peripheral unit select signals (log2 of PERIPHERY_COUNT)
+  integer SEED=15;
+  logic [LENGTH_SEND_P-1:0] data_send_p;
+  logic [9:0] regfile [0:5];                     // Register file for spi_reg peripheral
+  logic [LENGTH_SEND_C-1:0] COPI_register_0;    //Holds the data recieved at the peripheral unit (SPI_P_0)
+  wire cipo0, cipo1, cipo2, cipo3;
+  wire CIPO;
+  //logic SCK; 
+  logic [PERIPHERY_COUNT-1:0] CS_out;           //One-hot encoding
+  //logic COPI;                                   //Controller-Out Peripheral-In
   // -----------------------------
   // Instantiate DUT
   // -----------------------------
-  top dut (
+  top #(
+    .PAUSE(PAUSE),
+    .LENGTH_SEND_C(LENGTH_SEND_C),
+    .LENGTH_SEND_P(LENGTH_SEND_P),
+    .LENGTH_RECIEVED_C(LENGTH_RECIEVED_C),
+    .LENGTH_RECIEVED_P(LENGTH_RECIEVED_P),
+    .LENGTH_COUNT_C(LENGTH_COUNT_C),
+    .LENGTH_COUNT_P(LENGTH_COUNT_P),
+    .PERIPHERY_COUNT(PERIPHERY_COUNT),
+    .PERIPHERY_SELECT(PERIPHERY_SELECT)
+  ) u_spi_reg(
     .clk(clk),
     .rst(rst),
     .data_in(data_in),
+    .data_send_p(data_send_p), 
+    // SPI pins
+    .SCK(SCK),
+    .CS(CS_out[0]),
+    .COPI(COPI),
+    .CIPO(cipo0),
+    .COPI_register(COPI_register_0),
     .duty_high0(duty_high0),
     .duty_low0(duty_low0),
     .duty_high1(duty_high1),
@@ -42,7 +89,15 @@ module tb_top;
     .duty_low2(duty_low2),
     .duty_high3(duty_high3),
     .duty_low3(duty_low3),
-    .convst_bar(convst_bar)
+    .convst_bar(convst_bar),
+    .mon_duty_high(mon_duty_high),
+    .mon_duty_low(mon_duty_low),
+    .mode_manual(mode_manual),
+    .en_pwm(en_pwm),
+    .freq_switch(freq_switch),
+    .duty_high_manual(duty_high),
+    .duty_low_manual(duty_low),
+    .regfile(regfile)
   );
 
   // -----------------------------
