@@ -6,7 +6,7 @@
 系統採用 **4-phase interleaving 架構**，
 每一相具備獨立 DPWM high / low gate，
 相位電感並聯以降低電流漣波並分散應力。
-md is written by AI with checking the function for all blocking
+本說明事由AI 撰寫並且逐行確認所有function 
 
 ---
 
@@ -112,7 +112,7 @@ Deadtime DPWM 架構包含：
 
 ### Register Map (Example)
 
-> ：
+> 目前有時線測試功能寫入但是沒有放在一起：
 
 - **reg0: MODE/ENABLE/PHASE + deadtime + manual duty**
   - enable、mode、相位設定、deadtime、手動 duty override 等
@@ -162,5 +162,5 @@ Deadtime DPWM 架構包含：
 - Verilog / SystemVerilog
 - RTL simulation
 - (Planned) Verilog-A ADC + mixed-signal co-sim
-- Sky130 / OpenLane (future tapeout)
+- Sky130 / OpenLane (future tapeout) synthesis
 
