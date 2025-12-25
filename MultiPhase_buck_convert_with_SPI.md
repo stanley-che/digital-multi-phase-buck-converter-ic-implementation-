@@ -6,6 +6,7 @@
 系統採用 **4-phase interleaving 架構**，
 每一相具備獨立 DPWM high / low gate，
 相位電感並聯以降低電流漣波並分散應力。
+md is written by AI with checking the function for all blocking
 
 ---
 
@@ -109,9 +110,9 @@ Deadtime DPWM 架構包含：
 - `top.v` / `SPI.v`（依你的命名）  
   系統整合：把 SPI 寫入的設定接到 multiphase buck converter 的 encoder/compensator/dither/dpwm/deadtime 等模組。
 
-### Recommended Register Map (Example)
+### Register Map (Example)
 
-> 你可以依照目前 RTL 實作調整。下面是一個「好維護」的常用分法：
+> ：
 
 - **reg0: MODE/ENABLE/PHASE + deadtime + manual duty**
   - enable、mode、相位設定、deadtime、手動 duty override 等
